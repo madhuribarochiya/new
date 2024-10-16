@@ -1,55 +1,70 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom'; // Import the useNavigate hook
-import { FaThumbsUp, FaThumbsDown, FaCommentAlt, FaShareAlt, FaChartBar, FaTrash, FaPlus } from 'react-icons/fa';
+import { FaThumbsUp, FaThumbsDown, FaCommentAlt, FaShareAlt, FaTrash, FaPlus } from 'react-icons/fa';
+import axios from 'axios';
+import { useStateContext } from '../contexts/ContextProvider';
+import { toast, ToastContainer } from 'react-toastify';
+import Modal from 'react-modal';
+
+// Ensure the app element exists in your HTML
+Modal.setAppElement('#root'); // Ensure this ID matches an existing element
 
 const UploadedTools = () => {
   const navigate = useNavigate(); // Initialize useNavigate for redirection
-
+  const { user } = useStateContext();
   // State for managing uploaded tools
-  const [tools, setTools] = useState([
-    {
-      id: 1,
-      name: 'AI Model A',
-      description: 'This is a powerful AI model for predictive analysis.',
-      image: 'src/data/image.png',
-      likes: 10,
-      dislikes: 2,
-      comments: 5,
-    },
-    {
-      id: 2,
-      name: 'AI Tool B',
-      description: 'A tool to automate machine learning workflows.',
-      image: 'src/data/image.png',
-      likes: 15,
-      dislikes: 3,
-      comments: 7,
-    },
-  ]);
+  const [tools, setTools] = useState([]);
+  const [isModalOpen, setIsModalOpen] = useState(false); // State for modal visibility
+  const [toolToDelete, setToolToDelete] = useState(null); // State to hold the tool ID to delete
 
-  // Functions to handle user actions
-  const handleLike = (toolId) => {
-    // console.log(`Liked tool with id ${toolId}`);
+  useEffect(() => {
+    const fetchUserTools = async () => {
+      try {
+        if (user && user.username) {
+          const response = await axios.get(`http://localhost:4000/channel/getTools/${user?.username}`, {
+            withCredentials: true,
+          });
+          if (response.data.success) {
+            setTools(Array.isArray(response.data.data) ? response.data.data : []); // Ensure tools is an array
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching user tools', error);
+      }
+    };
+    fetchUserTools();
+  }, [user]);
+
+  const handleShare = (toolID) => {
+    navigator.clipboard.writeText(`frontend_url/${toolID}`);
   };
 
-  const handleDislike = (toolId) => {
-    // console.log(`Disliked tool with id ${toolId}`);
+  const openModal = (toolId) => {
+    setToolToDelete(toolId); // Set the tool ID to delete
+    setIsModalOpen(true); // Open the modal
   };
 
-  const handleComment = (toolId) => {
-    // console.log(`Commented on tool with id ${toolId}`);
+  const closeModal = () => {
+    setIsModalOpen(false); // Close the modal
+    setToolToDelete(null); // Reset the tool ID
   };
 
-  const handleShare = (toolId) => {
-    // console.log(`Shared tool with id ${toolId}`);
-  };
-
-  const handleAnalytics = (toolId) => {
-    // console.log(`View analytics for tool with id ${toolId}`);
-  };
-
-  const handleDelete = (toolId) => {
-    setTools(tools.filter((tool) => tool.id !== toolId));
+  const handleDelete = async () => {
+    if (!toolToDelete) return; // Exit if no tool is set
+    const toastid = toast.loading("Deleting tool..."); // Show loading toast
+    try {
+      const response = await axios.delete(`http://localhost:4000/tools/deleteTool/${toolToDelete}`, { withCredentials: true });
+      if (response.data.success) {
+        toast.update(toastid, { render: "Tool deleted", type: 'success', isLoading: false, autoClose: 3000 });
+        setTools(tools.filter((tool) => tool._id !== toolToDelete)); // Use _id instead of id
+      } else {
+        toast.update(toastid, { render: "Error deleting tool", type: 'error', isLoading: false, autoClose: 3000 });
+      }
+    } catch (error) {
+      toast.update(toastid, { render: "Error deleting tool", type: 'error', isLoading: false, autoClose: 3000 });
+      console.error('Error deleting tool', error); // Log the error for debugging
+    }
+    closeModal(); // Close the modal after deletion
   };
 
   // Redirect to the UploadTool page
@@ -58,51 +73,62 @@ const UploadedTools = () => {
   };
 
   return (
-    <div className="mt-24 p-8">
-      <h1 className="text-2xl font-bold mb-6">Uploaded AI Tools</h1>
-      <button
-        className="bg-blue-500 text-white font-semibold py-2 px-4 rounded-md mb-6 hover:bg-blue-600 flex items-center"
-        onClick={redirectToUploadTool} // Use the redirect function on button click
-      >
-        <FaPlus className="mr-2" /> Upload New Tool
-      </button>
+    <>
+      <ToastContainer />
+      {/* Modal for confirmation */}
+      <Modal isOpen={isModalOpen} onRequestClose={closeModal} className="fixed inset-0 flex items-center justify-center z-50 bg-transparent">
+        <div className="bg-white border-2 border-gray-300 rounded-3xl p-6 max-w-sm w-full">
+          <h2 className="text-lg font-semibold mb-4">Confirm Deletion</h2>
+          <p className="mb-6">Are you sure you want to delete this tool?</p>
+          <div className="flex justify-end">
+            <button onClick={handleDelete} className="bg-red-500 text-white font-semibold py-2 px-4 rounded-md mr-2">Yes, Delete</button>
+            <button onClick={closeModal} className="bg-gray-300 text-black font-semibold py-2 px-4 rounded-md">Cancel</button>
+          </div>
+        </div>
+      </Modal>
+      <div className="p-8">
+        <h1 className="text-2xl font-bold mb-6">Uploaded AI Tools</h1>
+        <button
+          type="button"
+          className="bg-blue-500 text-white font-semibold py-2 px-4 rounded-md mb-6 hover:bg-blue-600 flex items-center"
+          onClick={redirectToUploadTool} // Use the redirect function on button click
+        >
+          <FaPlus className="mr-2" /> Upload New Tool
+        </button>
 
-      {/* Display Uploaded Tools */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {tools.map((tool) => (
-          <div key={tool.id} className="bg-white dark:bg-secondary-dark-bg p-6 rounded-lg shadow-lg relative">
-            <img src={tool.image} alt={tool.name} className="w-full h-32 object-cover rounded-lg mb-4" />
-            <h2 className="text-lg font-semibold mb-2 dark:text-gray-200">{tool.name}</h2>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">{tool.description}</p>
-            <div className="flex justify-between items-center mb-4">
-              <div className="flex space-x-4">
-                <button onClick={() => handleLike(tool.id)} className="flex items-center text-gray-500 hover:text-blue-500">
+        {/* Display Uploaded Tools */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {tools.map((tool) => (
+            <div key={tool._id} className="bg-white dark:bg-secondary-dark-bg p-6 rounded-lg shadow-lg relative">
+              <img src={`http://localhost:4000/load/${tool.image[0] || 'default tool icon.jpeg'}`} alt={tool.name} className="w-full h-32 object-cover rounded-lg mb-4" />
+              <h2 className="text-lg font-semibold mb-2 dark:text-gray-200">{tool.name}</h2>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">{tool.description}</p>
+              <div className="flex justify-between mb-4">
+                <button type="button" className="flex items-center text-blue-500">
                   <FaThumbsUp className="mr-1" /> {tool.likes}
                 </button>
-                <button onClick={() => handleDislike(tool.id)} className="flex items-center text-gray-500 hover:text-red-500">
+                <button type="button" className="flex items-center text-red-500">
                   <FaThumbsDown className="mr-1" /> {tool.dislikes}
                 </button>
-                <button onClick={() => handleComment(tool.id)} className="flex items-center text-gray-500 hover:text-green-500">
-                  <FaCommentAlt className="mr-1" /> {tool.comments}
+                <button type="button" className="flex items-center text-green-500">
+                  <FaCommentAlt className="mr-1" /> {tool.comments.length}
                 </button>
-                <button onClick={() => handleShare(tool.id)} className="flex items-center text-gray-500 hover:text-purple-500">
+                <button type="button" onClick={() => handleShare(tool._id)} className="flex items-center text-purple-500">
                   <FaShareAlt className="mr-1" /> Share
                 </button>
               </div>
-              <button onClick={() => handleAnalytics(tool.id)} className="bg-blue-500 text-white font-semibold py-1 px-3 rounded-md hover:bg-blue-600">
-                <FaChartBar className="mr-1" /> Analytics
+              <button
+                type="button"
+                onClick={() => openModal(tool._id)} // Open modal on delete button click
+                className="absolute top-2 right-2 text-red-500 hover:text-red-700"
+              >
+                <FaTrash />
               </button>
             </div>
-            <button
-              onClick={() => handleDelete(tool.id)}
-              className="absolute top-2 right-2 text-red-500 hover:text-red-700"
-            >
-              <FaTrash />
-            </button>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 

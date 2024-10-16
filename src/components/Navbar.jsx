@@ -6,7 +6,7 @@ import { RiNotification3Line } from 'react-icons/ri';
 import { MdKeyboardArrowDown } from 'react-icons/md';
 import { TooltipComponent } from '@syncfusion/ej2-react-popups';
 
-import avatar from '../data/avatar.jpg';
+// import avatar from '../data/avatar.jpg';
 import { Notification, UserProfile } from '.';
 import { useStateContext } from '../contexts/ContextProvider';
 
@@ -28,7 +28,7 @@ const NavButton = ({ title, customFunc, icon, color, dotColor }) => (
 );
 
 const Navbar = () => {
-  const { user,currentColor, activeMenu, setActiveMenu, handleClick, isClicked, setScreenSize, screenSize, theme } = useStateContext();
+  const { user, currentColor, activeMenu, setActiveMenu, handleClick, isClicked, setScreenSize, screenSize, theme } = useStateContext();
 
   useEffect(() => {
     const handleResize = () => setScreenSize(window.innerWidth);
@@ -39,6 +39,9 @@ const Navbar = () => {
 
     return () => window.removeEventListener('resize', handleResize);
   }, []);
+
+  useEffect(() => {
+  }, [user]);
 
   useEffect(() => {
     if (screenSize <= 900) {
@@ -52,10 +55,6 @@ const Navbar = () => {
 
   return (
     <div className="flex justify-between items-center p-2 md:ml-6 md:mr-6 relative">
-
-      {/* Menu Button */}
-      <NavButton title="Menu" customFunc={handleActiveMenu} color={currentColor} icon={<AiOutlineMenu />} />
-
       {/* Search Bar */}
       <div className="flex-grow mx-4">
         <input
@@ -77,13 +76,13 @@ const Navbar = () => {
           >
             <img
               className="rounded-full w-8 h-8"
-              src={avatar}
+              src={`http://localhost:4000/load/${user ? user.ProfilePic : 'default user icon.jpeg'}`}
               alt="user-profile"
             />
             <p>
               <span className="text-gray-400 text-14">Hi,</span>{' '}
               <span className="text-gray-400 font-bold ml-1 text-14">
-                {user?.username?user.username:"User"}
+                {user?.username ? user.username : 'User'}
               </span>
             </p>
             <MdKeyboardArrowDown className="text-gray-400 text-14" />

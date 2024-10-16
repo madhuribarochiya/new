@@ -10,7 +10,6 @@ import UploadedTools from './components/UploadedTools';
 
 import { Navbar, Footer, Sidebar, ThemeSettings } from './components';
 import { Home, Library, History, Pie } from './pages';
-import Yourch from './pages/Yourch';
 import './App.css';
 import { useStateContext } from './contexts/ContextProvider';
 
@@ -25,7 +24,7 @@ const App = () => {
       setCurrentColor(currentThemeColor);
       setCurrentMode(currentThemeMode);
     }
-  }, []);
+  }, [setCurrentColor, setCurrentMode]);
 
   // Determine if we are on the login or signup page
   const isAuthPage = location.pathname === '/login' || location.pathname === '/signup';
@@ -45,8 +44,8 @@ const App = () => {
             </button>
           </TooltipComponent>
         </div>
-        {!isAuthPage && ( // Only show Sidebar if not on auth pages
-          <div className="w-72 fixed sidebar dark:bg-secondary-dark-bg bg-white ">
+        {!isAuthPage && (
+          <div className={`w-72 fixed sidebar dark:bg-secondary-dark-bg bg-white ${!activeMenu ? 'sidebar-closed' : ''}`}>
             <Sidebar />
           </div>
         )}
@@ -66,31 +65,15 @@ const App = () => {
             {themeSettings && <ThemeSettings />}
 
             <Routes>
-              {/* Render the Login Page */}
               <Route path="/login" element={<LoginPage />} />
-              {/* Render the Signup Page */}
               <Route path="/signup" element={<Signup />} />
               <Route path="/UploadTool" element={<UploadTool />} />
               <Route path="/UploadedTools" element={<UploadedTools />} />
-
-              {/* dashboard  */}
               <Route path="/" element={<Home />} />
               <Route path="/Home" element={<Home />} />
-              <Route path="/view-account" element={<ViewAccount />} />
-              {/* Other routes... */}
-              <Route path="/yourch" element={<Yourch />} />
+              <Route path="/viewAccount" element={<ViewAccount />} />
               <Route path="/Library" element={<Library />} />
               <Route path="/History" element={<History />} />
-
-              {/* apps  */}
-              {/* <Route path="/kanban" element={<Kanban />} /> */}
-              {/* <Route path="/editor" element={<Editor />} />
-              <Route path="/calendar" element={<Calendar />} />
-              <Route path="/color-picker" element={<ColorPicker />} /> */}
-
-              {/* charts  */}
-              {/* <Route path="/area" element={<Area />} /> */}
-              {/* <Route path="/bar" element={<Bar />} /> */}
               <Route path="/pie" element={<Pie />} />
             </Routes>
           </div>
