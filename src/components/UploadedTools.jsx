@@ -11,7 +11,7 @@ Modal.setAppElement('#root'); // Ensure this ID matches an existing element
 
 const UploadedTools = () => {
   const navigate = useNavigate(); // Initialize useNavigate for redirection
-  const { user } = useStateContext();
+  const { user, currentMode } = useStateContext();
   // State for managing uploaded tools
   const [tools, setTools] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false); // State for modal visibility
@@ -76,9 +76,15 @@ const UploadedTools = () => {
     <>
       <ToastContainer />
       {/* Modal for confirmation */}
-      <Modal isOpen={isModalOpen} onRequestClose={closeModal} className="fixed inset-0 flex items-center justify-center z-50 bg-transparent">
-        <div className="bg-white border-2 border-gray-300 rounded-3xl p-6 max-w-sm w-full">
-          <h2 className="text-lg font-semibold mb-4">Confirm Deletion</h2>
+      <Modal
+        isOpen={isModalOpen}
+        onRequestClose={closeModal}
+        className="fixed inset-0 flex items-center justify-center z-50 bg-transparent"
+        overlayClassName="fixed inset-0 bg-black bg-opacity-50"
+      >
+        <div className="bg-white border-2 border-gray-300 rounded-3xl p-6 max-w-sm w-full"
+          overlayClassName="fixed inset-0 bg-black bg-opacity-50">
+          <h2 className="text-lg font-semibold mb-4" >Confirm Deletion</h2>
           <p className="mb-6">Are you sure you want to delete this tool?</p>
           <div className="flex justify-end">
             <button onClick={handleDelete} className="bg-red-500 text-white font-semibold py-2 px-4 rounded-md mr-2">Yes, Delete</button>
@@ -87,7 +93,7 @@ const UploadedTools = () => {
         </div>
       </Modal>
       <div className="p-8">
-        <h1 className="text-2xl font-bold mb-6">Uploaded AI Tools</h1>
+        <h1 className={`text-${currentMode === "Dark" ? 'white' : "black"} text-2xl font-bold mb-6`}>Uploaded AI Tools</h1>
         <button
           type="button"
           className="bg-blue-500 text-white font-semibold py-2 px-4 rounded-md mb-6 hover:bg-blue-600 flex items-center"
@@ -104,16 +110,16 @@ const UploadedTools = () => {
               <h2 className="text-lg font-semibold mb-2 dark:text-gray-200">{tool.name}</h2>
               <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">{tool.description}</p>
               <div className="flex justify-between mb-4">
-                <button type="button" className="flex items-center text-blue-500">
+                <p className="flex items-center text-blue-500">
                   <FaThumbsUp className="mr-1" /> {tool.likes}
-                </button>
-                <button type="button" className="flex items-center text-red-500">
+                </p>
+                <p className="flex items-center text-red-500">
                   <FaThumbsDown className="mr-1" /> {tool.dislikes}
-                </button>
-                <button type="button" className="flex items-center text-green-500">
+                </p>
+                <p className="flex items-center text-green-500">
                   <FaCommentAlt className="mr-1" /> {tool.comments.length}
-                </button>
-                <button type="button" onClick={() => handleShare(tool._id)} className="flex items-center text-purple-500">
+                </p>
+                <button onClick={() => handleShare(tool._id)} className="flex items-center text-purple-500">
                   <FaShareAlt className="mr-1" /> Share
                 </button>
               </div>

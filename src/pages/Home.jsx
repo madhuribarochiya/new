@@ -1,57 +1,21 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { IoIosMore } from 'react-icons/io'; // For three dots menu icon
 import { useStateContext } from '../contexts/ContextProvider';
-import aiToolImage from '../data/image.png'; // Example image
 import { FaThumbsUp, FaThumbsDown, FaShareAlt, FaCommentAlt } from 'react-icons/fa';
-
-
-// Search Bar Component
-const SearchBar = ({ setSearchTerm, currentMode }) => (
-  <div className="mb-8">
-    <input
-      type="text"
-      placeholder="Search tools..."
-      onChange={(e) => setSearchTerm(e.target.value)}
-      className={`w-full p-2 border rounded-md 
-      ${currentMode === 'Dark' ? 'bg-gray-800 text-white border-gray-600' : 'bg-white text-black border-gray-300'}`}
-    />
-  </div>
-);
+import axios from 'axios';
 
 const ToolCard = ({ title, description, image }) => {
   const [menuOpen, setMenuOpen] = useState(false);
-  const [likeCount, setLikeCount] = useState(0);
-  const [dislikeCount, setDislikeCount] = useState(0);
-  const [commentCount, setCommentCount] = useState(0);
-  const [showCommentBox, setShowCommentBox] = useState(false);
-  const [comment, setComment] = useState('');
-  const [comments, setComments] = useState([]);
 
   const toggleMenu = () => {
     setMenuOpen(!menuOpen);
   };
 
-  const handleLike = () => {
-    setLikeCount(likeCount + 1);
-  };
-
-  const handleDislike = () => {
-    setDislikeCount(dislikeCount + 1);
-  };
-
-  const handleCommentSubmit = () => {
-    if (comment.trim() !== '') {
-      setComments([...comments, comment]);
-      setComment('');
-      setCommentCount(commentCount + 1);
-    }
-  };
-
   return (
     <div className="relative bg-white dark:text-gray-200 dark:bg-secondary-dark-bg rounded-2xl p-4 m-3 w-full">
-      <img src={image} alt={title} className="w-full h-48 object-cover rounded-md" />
+      <img src={`http://localhost:4000/load/${image}`} alt={title} className="w-full h-48 object-cover rounded-md" />
       <h2 className="text-lg font-semibold mt-2">{title}</h2>
-      <p className="text-sm text-gray-400">{description}</p>
+      <p className="text-sm text-gray-400 overflow-hidden text-ellipsis whitespace-nowrap">{description}</p>
 
       {/* Three Dots Menu */}
       <div className="absolute top-4 right-4">
@@ -73,47 +37,19 @@ const ToolCard = ({ title, description, image }) => {
 
       {/* Action Buttons */}
       <div className="flex justify-between items-center mt-4">
-        <button onClick={handleLike} className="flex items-center text-gray-500 hover:text-blue-500">
-          <FaThumbsUp className="mr-1" /> {likeCount}
+        {/* <button onClick={ } className="flex items-center text-gray-500 hover:text-blue-500">
+          <FaThumbsUp className="mr-1" /> { }
         </button>
-        <button onClick={handleDislike} className="flex items-center text-gray-500 hover:text-red-500">
-          <FaThumbsDown className="mr-1" /> {dislikeCount}
+        <button onClick={ } className="flex items-center text-gray-500 hover:text-red-500">
+          <FaThumbsDown className="mr-1" /> { }
         </button>
         <button className="flex items-center text-gray-500 hover:text-green-500">
-          <FaShareAlt className="mr-1" /> 
+          <FaShareAlt className="mr-1" />
         </button>
-        <button onClick={() => setShowCommentBox(!showCommentBox)} className="flex items-center text-gray-500 hover:text-purple-500">
-          <FaCommentAlt className="mr-1" /> {commentCount}
-        </button>
+        <button onClick={ } className="flex items-center text-gray-500 hover:text-purple-500">
+          <FaCommentAlt className="mr-1" /> { }
+        </button> */}
       </div>
-
-      {/* Comment Section (Hidden until the Comment button is clicked) */}
-      {showCommentBox && (
-        <div className="mt-4">
-          <textarea
-            className="w-full p-2 rounded-md border border-gray-300 focus:outline-none focus:border-blue-400"
-            rows="2"
-            placeholder="Add a comment..."
-            value={comment}
-            onChange={(e) => setComment(e.target.value)}
-          />
-          <button
-            onClick={handleCommentSubmit}
-            className="mt-2 py-1 px-3 rounded-md bg-blue-500 text-white hover:bg-blue-600"
-          >
-            Submit
-          </button>
-
-          {/* Display Comments */}
-          <div className="mt-4">
-            {comments.map((com, index) => (
-              <div key={index} className="text-sm text-gray-500 mt-1">
-                {com}
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
     </div>
   );
 };
@@ -121,39 +57,61 @@ const ToolCard = ({ title, description, image }) => {
 
 
 const Home = () => {
-  const { currentColor, currentMode } = useStateContext();
-  const [searchTerm, setSearchTerm] = useState('');
+  const { currentMode } = useStateContext();
+  const [displayedTools, setDisplayedTools] = useState([]); // New state for displayed tools
 
-  const tools = [
-    { title: 'AI Tool 1', description: 'Description of AI Tool 1', image: aiToolImage },
-    { title: 'AI Tool 2', description: 'Description of AI Tool 2', image: aiToolImage },
-    { title: 'AI Tool 3', description: 'Description of AI Tool 3', image: aiToolImage },
-    { title: 'AI Tool 4', description: 'Description of AI Tool 4', image: aiToolImage },
-    { title: 'AI Tool 5', description: 'Description of AI Tool 5', image: aiToolImage },
-    { title: 'AI Tool 6', description: 'Description of AI Tool 6', image: aiToolImage },
-    { title: 'AI Tool 7', description: 'Description of AI Tool 7', image: aiToolImage },
-    { title: 'AI Tool 8', description: 'Description of AI Tool 8', image: aiToolImage },
-    { title: 'AI Tool 9', description: 'Description of AI Tool 9', image: aiToolImage },
-  ];
+  const [tools, setTools] = useState([]);
+  const containerRef = useRef(null);
 
-  // Filter tools based on search input
-  const filteredTools = tools.filter((tool) =>
-    tool.title.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const fetchTools = async () => {
+    try {
+      const response = await axios.get('http://localhost:4000/tools/tools', { withCredentials: true });
+      if (response.data.success) {
+        setTools(prevTools => [...prevTools, ...response.data.data]); // Append new tools
+        setDisplayedTools(response.data.data); // Set displayed tools initially
+      }
+    } catch (error) {
+      console.error('Error fetching tools:', error);
+    }
+  };
+
+  // Load initial tools
+  useEffect(() => {
+    fetchTools(); // Fetch tools on component mount
+  }, []);
+
+  // Infinite scroll logic
+  useEffect(() => {
+    const handleScroll = () => {
+      if (containerRef.current) {
+        const { scrollTop, scrollHeight, clientHeight } = containerRef.current;
+        if (scrollTop + clientHeight >= scrollHeight - 5) {
+          fetchTools(); // Fetch more tools when at the bottom
+        }
+      }
+    };
+
+    const currentContainer = containerRef.current;
+    currentContainer.addEventListener('scroll', handleScroll);
+
+    return () => {
+      currentContainer.removeEventListener('scroll', handleScroll);
+    };
+  }, [containerRef]);
 
   return (
-    <div className="mt-24">
+    <div className="mt-24" ref={containerRef} style={{ overflowY: 'auto', maxHeight: '80vh' }}>
       {/* Search Bar */}
       {/* <SearchBar setSearchTerm={setSearchTerm} currentMode={currentMode} /> */}
 
       {/* Adjusted Grid Layout for Tool Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 p-4">
-        {filteredTools.map((tool, index) => (
+        {tools.map((tool, index) => (
           <ToolCard
             key={index}
             title={tool.title}
             description={tool.description}
-            image={tool.image}
+            image={tool.image[0]}
           />
         ))}
       </div>

@@ -8,10 +8,11 @@ import Signup from './components/signup'; // Import the Signup component
 import UploadTool from './components/UploadTool';
 import UploadedTools from './components/UploadedTools';
 
-import { Navbar, Footer, Sidebar, ThemeSettings } from './components';
+import { Navbar, Sidebar, ThemeSettings } from './components';
 import { Home, Library, History, Pie } from './pages';
 import './App.css';
 import { useStateContext } from './contexts/ContextProvider';
+import AITool from './pages/AItool';
 
 const App = () => {
   const { setCurrentColor, setCurrentMode, currentMode, activeMenu, currentColor, themeSettings, setThemeSettings } = useStateContext();
@@ -75,9 +76,9 @@ const App = () => {
               <Route path="/Library" element={<Library />} />
               <Route path="/History" element={<History />} />
               <Route path="/pie" element={<Pie />} />
+              <Route path="/tool" element={<AITool />} />
             </Routes>
           </div>
-          <Footer />
         </div>
       </div>
     </div>
