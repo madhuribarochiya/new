@@ -1,55 +1,54 @@
-import React, { useState } from 'react';
-import { useStateContext } from '../contexts/ContextProvider';
-import aiToolImage from '../data/image.png'; // Example image
+import React, { useState, useEffect } from 'react';
 import { IoIosMore } from 'react-icons/io';
-import { FaThumbsUp, FaThumbsDown, FaShareAlt, FaCommentAlt, FaTrash } from 'react-icons/fa';
+import { FaThumbsUp, FaThumbsDown, FaShareAlt, FaCommentAlt } from 'react-icons/fa';
+import axios from 'axios';
+import { ToastContainer, toast } from 'react-toastify';
 
 // Search Bar Component
-const SearchBar = ({ setSearchTerm, currentMode }) => (
-  <div className="mb-8">
-    <input
-      type="text"
-      placeholder="Search tools..."
-      onChange={(e) => setSearchTerm(e.target.value)}
-      className={`w-full p-2 border rounded-md 
-      ${currentMode === 'Dark' ? 'bg-gray-800 text-white border-gray-600' : 'bg-white text-black border-gray-300'}`}
-    />
-  </div>
-);
+// const SearchBar = ({ setSearchTerm, currentMode }) => (
+//   <div className="mb-8">
+//     <input
+//       type="text"
+//       placeholder="Search tools..."
+//       onChange={(e) => setSearchTerm(e.target.value)}
+//       className={`w-full p-2 border rounded-md 
+//       ${currentMode === 'Dark' ? 'bg-gray-800 text-white border-gray-600' : 'bg-white text-black border-gray-300'}`}
+//     />
+//   </div>
+// );
 
 // Tool Card Component with Delete Option
-const ToolCard = ({ title, description, image, onDelete }) => {
+const ToolCard = ({ title, description, image, tool }) => {
   const [menuOpen, setMenuOpen] = useState(false);
-  const [likeCount, setLikeCount] = useState(0);
-  const [dislikeCount, setDislikeCount] = useState(0);
-  const [commentCount, setCommentCount] = useState(0);
-  const [showCommentBox, setShowCommentBox] = useState(false);
-  const [comment, setComment] = useState('');
-  const [comments, setComments] = useState([]);
+
+  const toolImage = Array.isArray(image) && image.length > 0 ? image[0] : 'default tool icon.jpeg';
 
   const toggleMenu = () => {
-    setMenuOpen(!menuOpen);
+    setMenuOpen(prev => !prev); // Use functional update for better state management
   };
 
-  const handleLike = () => {
-    setLikeCount(likeCount + 1);
+  const handleShare = (toolID) => {
+    navigator.clipboard.writeText(`frontend_url/${toolID}`);
   };
 
-  const handleDislike = () => {
-    setDislikeCount(dislikeCount + 1);
-  };
-
-  const handleCommentSubmit = () => {
-    if (comment.trim() !== '') {
-      setComments([...comments, comment]);
-      setComment('');
-      setCommentCount(commentCount + 1);
+  const handleRemove = async (toolID) => {
+    const tID = toast.loading("Removing tool from library...");
+    try {
+      const response = await axios.delete(`http://localhost:4000/user/removeFromLibrary`, { _id: toolID }, { withCredentials: true });
+      console.log(response);
+      if (response.data.success) {
+        toast.update(tID, { render: "Tool removed from library!", type: "success", isLoading: false, autoClose: 3000 }); // Success toast
+      } else {
+        toast.update(tID, { render: "Unauthorized", type: "error", isLoading: false, autoClose: 3000 }); // Error toast
+      }
+    } catch (error) {
+      toast.update(tID, { render: "An error occurred while removing the tool.", type: "error", isLoading: false, autoClose: 3000 }); // Error toast
     }
   };
 
   return (
     <div className="relative bg-white dark:text-gray-200 dark:bg-secondary-dark-bg rounded-2xl p-4 m-3 w-full">
-      <img src={image} alt={title} className="w-full h-48 object-cover rounded-md" />
+      <img src={`http://localhost:4000/load/${toolImage}`} alt={title} className="w-full h-48 object-cover rounded-md" />
       <h2 className="text-lg font-semibold mt-2">{title}</h2>
       <p className="text-sm text-gray-400">{description}</p>
 
@@ -61,11 +60,7 @@ const ToolCard = ({ title, description, image, onDelete }) => {
         {menuOpen && (
           <div className="absolute bg-white dark:bg-gray-800 p-2 rounded-md shadow-lg right-0 mt-2 z-10 w-48">
             <ul>
-              <li className="hover:bg-gray-100 dark:hover:bg-gray-700 p-2 cursor-pointer">Save to Watch Later</li>
-              <li className="hover:bg-gray-100 dark:hover:bg-gray-700 p-2 cursor-pointer">Bookmark</li>
-              <li className="hover:bg-gray-100 dark:hover:bg-gray-700 p-2 cursor-pointer">Share</li>
-              <li className="hover:bg-gray-100 dark:hover:bg-gray-700 p-2 cursor-pointer">Not interested</li>
-              <li className="hover:bg-gray-100 dark:hover:bg-gray-700 p-2 cursor-pointer">Don't recommend channel</li>
+              <li onClick={(toolID) => { handleRemove(toolID) }} className="hover:bg-gray-100 dark:hover:bg-gray-700 p-2 cursor-pointer">Remove from Library</li>
             </ul>
           </div>
         )}
@@ -73,94 +68,75 @@ const ToolCard = ({ title, description, image, onDelete }) => {
 
       {/* Action Buttons */}
       <div className="flex justify-between items-center mt-4">
-        <button onClick={handleLike} className="flex items-center text-gray-500 hover:text-blue-500">
-          <FaThumbsUp className="mr-1" /> {likeCount}
-        </button>
-        <button onClick={handleDislike} className="flex items-center text-gray-500 hover:text-red-500">
-          <FaThumbsDown className="mr-1" /> {dislikeCount}
-        </button>
-        <button className="flex items-center text-gray-500 hover:text-green-500">
+        <p className="flex items-center text-blue-500">
+          <FaThumbsUp className="mr-1" /> {tool.likes}
+        </p>
+        <p className="flex items-center text-red-500">
+          <FaThumbsDown className="mr-1" /> {tool.dislikes}
+        </p>
+        <p className="flex items-center text-green-500">
+          <FaCommentAlt className="mr-1" /> {tool.comments ? tool.comments.length : 0} {/* Added check for tool.comments */}
+        </p>
+        <button onClick={() => handleShare(tool._id)} className="flex items-center text-purple-500">
           <FaShareAlt className="mr-1" />
         </button>
-        <button onClick={() => setShowCommentBox(!showCommentBox)} className="flex items-center text-gray-500 hover:text-purple-500">
-          <FaCommentAlt className="mr-1" /> {commentCount}
-        </button>
-        <button onClick={onDelete} className="flex items-center text-gray-500 hover:text-red-500">
-          <FaTrash className="mr-1" />
-        </button>
       </div>
-
-      {/* Comment Section (Hidden until the Comment button is clicked) */}
-      {showCommentBox && (
-        <div className="mt-4">
-          <textarea
-            className="w-full p-2 rounded-md border border-gray-300 focus:outline-none focus:border-blue-400"
-            rows="2"
-            placeholder="Add a comment..."
-            value={comment}
-            onChange={(e) => setComment(e.target.value)}
-          />
-          <button
-            onClick={handleCommentSubmit}
-            className="mt-2 py-1 px-3 rounded-md bg-blue-500 text-white hover:bg-blue-600"
-          >
-            Submit
-          </button>
-
-          {/* Display Comments */}
-          <div className="mt-4">
-            {comments.map((com, index) => (
-              <div key={index} className="text-sm text-gray-500 mt-1">
-                {com}
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
     </div>
   );
 };
 
 // History Component
 const History = () => {
-  const { currentMode } = useStateContext();
-  const [searchTerm, setSearchTerm] = useState('');
-  const [viewedTools, setViewedTools] = useState([
-    { title: 'AI Tool 1', description: 'Description of AI Tool 1', image: aiToolImage },
-    { title: 'AI Tool 2', description: 'Description of AI Tool 2', image: aiToolImage },
-    { title: 'AI Tool 3', description: 'Description of AI Tool 3', image: aiToolImage },
-    { title: 'AI Tool 4', description: 'Description of AI Tool 4', image: aiToolImage },
-  ]);
+  // const [searchTerm, setSearchTerm] = useState('');
+  const [viewedTools, setViewedTools] = useState([]);
 
-  // Handle delete tool from the viewed list
-  const handleDelete = (indexToDelete) => {
-    setViewedTools(viewedTools.filter((_, index) => index !== indexToDelete));
+  const fetchTools = async () => {
+    try {
+      const response = await axios.get('http://localhost:4000/user/getHistory', { withCredentials: true });
+      if (response.data.success) {
+        setViewedTools(response.data.data);
+      } else {
+        console.error("Failed to fetch tools."); // Error toast
+      }
+    } catch (error) {
+      console.error('Error fetching tools:', error);
+    }
   };
 
+  // Load initial tools
+  useEffect(() => {
+    fetchTools(); // Fetch tools on component mount
+  }, []);
+
   // Filter tools based on search input
-  const filteredTools = viewedTools.filter((tool) =>
-    tool.title.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // const filteredTools = viewedTools ? viewedTools.filter((tool) =>
+  //   tool.title && tool.title.toLowerCase().includes(searchTerm.toLowerCase()) // Changed from tool.name to tool.title
+  // ) : ([]);
 
   return (
-    <div className="mt-24">
-      {/* Search Bar */}
-      <SearchBar setSearchTerm={setSearchTerm} currentMode={currentMode} />
+    <>
+      <ToastContainer />
+      <div className="">
+        {/* Search Bar */}
+        {/* <SearchBar setSearchTerm={setSearchTerm} currentMode={currentMode} /> */}
 
-      {/* Viewed Tools Section */}
-      <h2 className="text-2xl font-bold mb-4">Viewed Tools</h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 p-4">
-        {filteredTools.map((tool, index) => (
-          <ToolCard
-            key={index}
-            title={tool.title}
-            description={tool.description}
-            image={tool.image}
-            onDelete={() => handleDelete(index)}
-          />
-        ))}
+        {/* Viewed Tools Section */}
+        {/* <h2 className="text-2xl font-bold mb-4">Viewed Tools</h2> */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 p-4">
+          {viewedTools.map((tool, index) => (
+            tool && (
+              <ToolCard
+                key={index}
+                title={tool.toolId.title}
+                description={tool.toolId.description}
+                image={tool.toolId.image}
+                tool={tool.toolId}
+              />
+            )
+          ))}
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 

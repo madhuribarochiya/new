@@ -105,10 +105,14 @@ const UploadedTools = () => {
         {/* Display Uploaded Tools */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {tools.map((tool) => (
-            <div key={tool._id} className="bg-white dark:bg-secondary-dark-bg p-6 rounded-lg shadow-lg relative">
+            <div
+              key={tool._id}
+              className="bg-white dark:bg-secondary-dark-bg p-6 rounded-lg shadow-lg relative"
+              onClick={() => navigate(`/tool/${tool._id}`)}
+            >
               <img src={`http://localhost:4000/load/${tool.image[0] || 'default tool icon.jpeg'}`} alt={tool.name} className="w-full h-32 object-cover rounded-lg mb-4" />
               <h2 className="text-lg font-semibold mb-2 dark:text-gray-200">{tool.name}</h2>
-              <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">{tool.description}</p>
+              <p className="overflow-hidden text-sm text-gray-500 dark:text-gray-400 mb-4">{tool.description.length > 100 ? `${tool.description.substring(0, 100)}...` : tool.description}</p>
               <div className="flex justify-between mb-4">
                 <p className="flex items-center text-blue-500">
                   <FaThumbsUp className="mr-1" /> {tool.likes}

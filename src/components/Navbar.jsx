@@ -1,5 +1,4 @@
 import React, { useEffect } from 'react';
-import { AiOutlineMenu } from 'react-icons/ai';
 // import { FiShoppingCart } from 'react-icons/fi';
 // import { BsChatLeft } from 'react-icons/bs';
 import { RiNotification3Line } from 'react-icons/ri';
@@ -88,9 +87,6 @@ const Navbar = () => {
             <MdKeyboardArrowDown className="text-gray-400 text-14" />
           </div>
         </TooltipComponent>
-
-        {/* {isClicked.cart && (<Cart />)}
-        {isClicked.chat && (<Chat />)} */}
         {isClicked.notification && (<Notification />)}
         {isClicked.userProfile && (<UserProfile />)}
       </div>

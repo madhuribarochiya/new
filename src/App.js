@@ -76,7 +76,7 @@ const App = () => {
               <Route path="/Library" element={<Library />} />
               <Route path="/History" element={<History />} />
               <Route path="/pie" element={<Pie />} />
-              <Route path="/tool" element={<AITool />} />
+              <Route path="/tool/:id" element={<AITool />} />
             </Routes>
           </div>
         </div>

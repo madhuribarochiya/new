@@ -78,8 +78,8 @@ export const ContextProvider = ({ children }) => {
         setColor,
         themeSettings,
         setThemeSettings,
-        isLoggedIn, // Provide login state
-        setIsLoggedIn, // Function to toggle login state
+        isLoggedIn,
+        setIsLoggedIn,
         user,
         setUser,
         fetchUser,

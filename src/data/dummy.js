@@ -308,13 +308,14 @@ export const links = [
   {
     title: 'Pages',
     links: [
-      {
-        name: 'ViewAccount',
-        icon: <FiUser />,
-      },
+
       {
         name: 'Library',
         icon: <IoFileTrayStackedOutline />,
+      },
+      {
+        name: 'ViewAccount',
+        icon: <FiUser />,
       },
       {
         name: 'History',
@@ -359,10 +360,10 @@ export const links = [
       //   name: 'bar',
       //   icon: <AiOutlineBarChart />,
       // },
-      {
-        name: 'pie',
-        icon: <FiPieChart />,
-      }
+      // {
+      //   name: 'pie',
+      //   icon: <FiPieChart />,
+      // }
       // {
       //   name: 'financial',
       //   icon: <RiStockLine />,
