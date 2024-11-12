@@ -13,6 +13,7 @@ import { Home, Library, History, Pie } from './pages';
 import './App.css';
 import { useStateContext } from './contexts/ContextProvider';
 import AITool from './pages/AItool';
+import Search from './pages/Search';
 
 const App = () => {
   const { setCurrentColor, setCurrentMode, currentMode, activeMenu, currentColor, themeSettings, setThemeSettings } = useStateContext();
@@ -77,6 +78,7 @@ const App = () => {
               <Route path="/History" element={<History />} />
               <Route path="/pie" element={<Pie />} />
               <Route path="/tool/:id" element={<AITool />} />
+              <Route path="/search/:id" element={<Search />} />
             </Routes>
           </div>
         </div>

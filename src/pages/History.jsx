@@ -3,24 +3,13 @@ import { IoIosMore } from 'react-icons/io';
 import { FaThumbsUp, FaThumbsDown, FaShareAlt, FaCommentAlt } from 'react-icons/fa';
 import axios from 'axios';
 import { ToastContainer, toast } from 'react-toastify';
-
-// Search Bar Component
-// const SearchBar = ({ setSearchTerm, currentMode }) => (
-//   <div className="mb-8">
-//     <input
-//       type="text"
-//       placeholder="Search tools..."
-//       onChange={(e) => setSearchTerm(e.target.value)}
-//       className={`w-full p-2 border rounded-md 
-//       ${currentMode === 'Dark' ? 'bg-gray-800 text-white border-gray-600' : 'bg-white text-black border-gray-300'}`}
-//     />
-//   </div>
-// );
+import { useNavigate } from 'react-router-dom';
+import { useStateContext } from '../contexts/ContextProvider';
 
 // Tool Card Component with Delete Option
 const ToolCard = ({ title, description, image, tool }) => {
   const [menuOpen, setMenuOpen] = useState(false);
-
+  const navigate = useNavigate();
   const toolImage = Array.isArray(image) && image.length > 0 ? image[0] : 'default tool icon.jpeg';
 
   const toggleMenu = () => {
@@ -28,7 +17,7 @@ const ToolCard = ({ title, description, image, tool }) => {
   };
 
   const handleShare = (toolID) => {
-    navigator.clipboard.writeText(`frontend_url/${toolID}`);
+    navigator.clipboard.writeText(`localhost:3000/tool/${toolID}`);
   };
 
   const handleRemove = async (toolID) => {
@@ -48,9 +37,9 @@ const ToolCard = ({ title, description, image, tool }) => {
 
   return (
     <div className="relative bg-white dark:text-gray-200 dark:bg-secondary-dark-bg rounded-2xl p-4 m-3 w-full">
-      <img src={`http://localhost:4000/load/${toolImage}`} alt={title} className="w-full h-48 object-cover rounded-md" />
+      <img src={`http://localhost:4000/load/${toolImage}`} alt={title} className="w-full h-48 object-cover rounded-md" onClick={() => navigate(`/tool/${tool._id}`)} />
       <h2 className="text-lg font-semibold mt-2">{title}</h2>
-      <p className="text-sm text-gray-400">{description}</p>
+      <p className="text-sm text-gray-400 overflow-hidden">{tool.description.length > 100 ? `${description.substring(0, 100)}...` : description}</p>
 
       {/* Three Dots Menu */}
       <div className="absolute top-4 right-4">
@@ -89,6 +78,8 @@ const ToolCard = ({ title, description, image, tool }) => {
 const History = () => {
   // const [searchTerm, setSearchTerm] = useState('');
   const [viewedTools, setViewedTools] = useState([]);
+  const { user } = useStateContext();
+  const navigate = useNavigate()
 
   const fetchTools = async () => {
     try {
@@ -112,6 +103,15 @@ const History = () => {
   // const filteredTools = viewedTools ? viewedTools.filter((tool) =>
   //   tool.title && tool.title.toLowerCase().includes(searchTerm.toLowerCase()) // Changed from tool.name to tool.title
   // ) : ([]);
+
+  if (!user) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <button className="bg-blue-500 text-white px-4 py-2 rounded" onClick={() => navigate("/login")}>
+          Log in to view your History
+        </button>
+      </div>)
+  }
 
   return (
     <>

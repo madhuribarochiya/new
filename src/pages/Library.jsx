@@ -4,6 +4,7 @@ import { IoIosMore } from 'react-icons/io';
 import { FaThumbsUp, FaThumbsDown, FaShareAlt, FaCommentAlt } from 'react-icons/fa';
 import axios from 'axios';
 import { ToastContainer, toast } from 'react-toastify';
+import { useNavigate } from 'react-router-dom';
 
 // Search Bar Component
 const SearchBar = ({ setSearchTerm, currentMode }) => (
@@ -21,13 +22,12 @@ const SearchBar = ({ setSearchTerm, currentMode }) => (
 // Tool Card Component
 const ToolCard = ({ title, description, image, tool, set }) => {
   const [menuOpen, setMenuOpen] = useState(false);
-
+  const navigate = useNavigate();
   const toggleMenu = () => {
     setMenuOpen(!menuOpen);
   };
-
   const handleShare = (toolID) => {
-    navigator.clipboard.writeText(`frontend_url/${toolID}`);
+    navigator.clipboard.writeText(`localhost:3000/tool/${toolID}`);
   };
 
   const handleRemove = async (toolID) => {
@@ -48,7 +48,7 @@ const ToolCard = ({ title, description, image, tool, set }) => {
 
   return (
     <div className="relative bg-white dark:text-gray-200 dark:bg-secondary-dark-bg rounded-2xl p-4 m-3 w-full">
-      <img src={`http://localhost:4000/load/${image}`} alt={title} className="w-full h-48 object-cover rounded-md" />
+      <img src={`http://localhost:4000/load/${image}`} alt={title} className="w-full h-48 object-cover rounded-md" onClick={() => navigate(`/tool/${tool._id}`)} />
       <h2 className="text-lg font-semibold mt-2">{title}</h2>
       <p className="text-sm text-gray-400">{description}</p>
 
@@ -87,10 +87,10 @@ const ToolCard = ({ title, description, image, tool, set }) => {
 
 // Library Component
 const Library = () => {
-  const { currentMode } = useStateContext();
+  const { isLoggedIn, currentMode } = useStateContext();
   const [tools, setTools] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
-
+  const navigate = useNavigate();
   const fetchTools = async () => {
     try {
       const response = await axios.get('http://localhost:4000/user/library', { withCredentials: true });
@@ -106,8 +106,8 @@ const Library = () => {
 
   // Load initial tools
   useEffect(() => {
-    fetchTools(); // Fetch tools on component mount
-  }, []);
+    if (isLoggedIn) fetchTools();
+  });
 
   // Filter tools based on search input
   const filteredToolLists = tools.filter((tool) =>
@@ -122,18 +122,28 @@ const Library = () => {
         <SearchBar setSearchTerm={setSearchTerm} currentMode={currentMode} />
 
         {/* Render each ToolList category */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 p-4">
-          {filteredToolLists.map((tool, toolIndex) => (
-            <ToolCard
-              key={toolIndex}
-              title={tool.name}
-              description={tool.description}
-              image={tool.image[0]}
-              tool={tool}
-              set={setTools}
-            />
-          ))}
-        </div>
+        {isLoggedIn ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 p-4">
+            {filteredToolLists.map((tool, toolIndex) => (
+              <ToolCard
+                key={toolIndex}
+                title={tool.name}
+                description={tool.description}
+                image={tool.image.length > 0 ? tool.image[0] : 'default tool icon.jpeg'}
+                tool={tool}
+                set={setTools}
+              />
+            ))
+            }
+          </div>
+        ) : (
+          <div className="flex justify-center items-center h-full">
+            <button className="bg-blue-500 text-white px-4 py-2 rounded" onClick={() => navigate("/login")}>
+              Log in to view your library
+            </button>
+          </div>
+        )
+        }
       </div>
     </>
   );

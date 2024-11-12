@@ -12,87 +12,19 @@ import { useStateContext } from '../contexts/ContextProvider';
 const ChannelDetails = ({ details, currentMode }) => (
   <div className={`p-4 rounded-lg w-full max-w-sm ${currentMode === 'Dark' ? 'bg-gray-800 text-white' : 'bg-gray-100 text-black'}`}>
     <h3 className="text-lg font-semibold">Channel details</h3>
-    <p className="mt-2">URL: <a href={`https://fronted_url/${details.username}`} target="_blank" rel="noopener noreferrer" className="text-blue-500">{`https://fronted_url/${details.username}`}</a></p>
-    <p className="mt-2">Subscribers: {details.subscribers}</p>
-    <p className="mt-2">No of tools: {details.noOfTools}</p>
-    <p className="mt-2">Views: {details.views}</p>
+    {/* <p className="mt-2">URL: <a href={`https://fronted_url/${details.username}`} target="_blank" rel="noopener noreferrer" className="text-blue-500">{`https://fronted_url/${details.username}`}</a></p> */}
+    <p className="mt-2">Subscribers: {5674}{/* {details.subscribers} */}</p>
+    <p className="mt-2">No of tools: {20/* details.noOfTools */}</p>
+    <p className="mt-2">Views: {500/* details.views */}</p>
   </div>
 );
-
-// AI Tool Card Component
-// const ToolCard = ({ title, description, image, currentMode, onLike, onDislike, onShare, onComment, likeCount, dislikeCount, commentCount }) => {
-//   const [showCommentBox, setShowCommentBox] = useState(false);
-//   const [comment, setComment] = useState('');
-//   const [comments, setComments] = useState([]);
-
-//   // Handle comment submission
-//   const handleCommentSubmit = () => {
-//     if (comment.trim() !== '') {
-//       setComments([...comments, comment]);
-//       setComment('');
-//       onComment(title, comment); // Pass comment to parent handler
-//     }
-//   };
-
-//   return (
-//     <div className={`relative rounded-2xl p-4 m-3 w-full ${currentMode === 'Dark' ? 'bg-secondary-dark-bg text-white' : 'bg-white text-black'}`}>
-//       <img src={`http://localhost:4000/load/${image || 'default tool icon.jpeg'}`} className="w-full h-48 object-cover rounded-md" />
-//       <h2 className="text-lg font-semibold mt-2">{title}</h2>
-//       <p className="text-sm text-gray-400">{description}</p>
-
-//       {/* Action Buttons */}
-//       <div className="flex justify-between items-center mt-4">
-//         <button type="button" onClick={onLike} className="flex items-center text-gray-500 hover:text-blue-500">
-//           <FaThumbsUp className="mr-1" />  {likeCount}
-//         </button>
-//         <button type="button" onClick={onDislike} className="flex items-center text-gray-500 hover:text-red-500">
-//           <FaThumbsDown className="mr-1" />  {dislikeCount}
-//         </button>
-//         <button type="button" onClick={onShare} className="flex items-center text-gray-500 hover:text-green-500">
-//           <FaShareAlt className="mr-1" />
-//         </button>
-//         <button type="button" onClick={() => setShowCommentBox(!showCommentBox)} className="flex items-center text-gray-500 hover:text-purple-500">
-//           <FaCommentAlt className="mr-1" />  {commentCount}
-//         </button>
-//       </div>
-
-//       {/* Comment Section (Hidden until the Comment button is clicked) */}
-//       {showCommentBox && (
-//         <div className="mt-4">
-//           <textarea
-//             className="w-full p-2 rounded-md border border-gray-300 focus:outline-none focus:border-blue-400"
-//             rows="2"
-//             placeholder="Add a comment..."
-//             value={comment}
-//             onChange={(e) => setComment(e.target.value)}
-//           />
-//           <button
-//             type="button"
-//             onClick={handleCommentSubmit}
-//             className="mt-2 py-1 px-3 rounded-md bg-blue-500 text-white hover:bg-blue-600"
-//           >
-//             Submit
-//           </button>
-
-//           <div className="mt-4">
-//             {comments.map((com, index) => (
-//               <div key={index} className="text-sm text-gray-500 mt-1">
-//                 {com}
-//               </div>
-//             ))}
-//           </div>
-//         </div>
-//       )}
-//     </div>
-//   );
-// };
 
 const ViewAccount = () => {
   const navigate = useNavigate();
   const handleManageAITools = () => {
     navigate('/UploadedTools');
   };
-  const { setUser, user, currentMode } = useStateContext();
+  const { isLoggedIn, setUser, user, currentMode } = useStateContext();
 
   const [details, setDetails] = useState({});
 
@@ -135,9 +67,13 @@ const ViewAccount = () => {
       toast.error('An error occurred while uploading the image.');
     }
   };
-
-  if (!user) {
-    return <div>Loading user data...</div>;
+  if (!isLoggedIn) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <button className="bg-blue-500 text-white px-4 py-2 rounded" onClick={() => navigate("/login")}>
+          Log in to view your library
+        </button>
+      </div>)
   }
 
   return (

@@ -2,7 +2,6 @@
 /* eslint-disable react/button-has-type */
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom'; // Import the Link component from react-router-dom
-import { FcGoogle } from 'react-icons/fc'; // Google icon
 import axios from 'axios';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -11,11 +10,6 @@ import { useStateContext } from '../contexts/ContextProvider'; // Import the con
 const Login = () => {
   const { fetchUser, setIsLoggedIn, currentMode } = useStateContext(); // Access currentMode from the context
   const navigate = useNavigate();
-  // Dummy function for Google sign-in
-  const handleGoogleSignIn = () => {
-    // Add your Google sign-in logic here
-    // console.log('Sign in with Google');
-  };
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -46,13 +40,13 @@ const Login = () => {
           <h2 className="text-2xl font-bold text-center">Login to AITUBE</h2>
 
           {/* Google Sign-In Button */}
-          <button
+          {/* <button
             onClick={handleGoogleSignIn}
             className={`w-full flex items-center justify-center py-2 border rounded focus:outline-none focus:ring-2 ${currentMode === 'Dark' ? 'border-gray-600 hover:bg-gray-700 focus:ring-gray-500' : 'border-gray-300 hover:bg-gray-50 focus:ring-gray-500'}`}
           >
-            <FcGoogle className="text-2xl mr-2" /> {/* Google icon */}
+            <FcGoogle className="text-2xl mr-2" />
             Sign in with Google
-          </button>
+          </button> */}
 
           {/* Form Fields */}
           <form className="space-y-4">

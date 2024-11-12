@@ -3,8 +3,10 @@ import axios from 'axios';
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast, ToastContainer } from "react-toastify";
+import { useStateContext } from "../contexts/ContextProvider"
 
 const UploadTool = () => {
+  const { currentMode } = useStateContext();
   const naviagte = useNavigate();
   const [toolName, setToolName] = useState('');
   const [description, setDescription] = useState('');
@@ -63,7 +65,7 @@ const UploadTool = () => {
     <>
       <ToastContainer />
       <div className="p-8">
-        <h1 className="text-2xl font-bold mb-6">Upload AI Tool</h1>
+        <h1 className={`text-2xl text-${currentMode === "black" ? "black" : "white"} font-bold mb-6`}>Upload AI Tool</h1>
         <form onSubmit={handleSubmit} className="bg-white dark:bg-secondary-dark-bg p-8 rounded-lg shadow-lg">
           {currentPage === 1 && ( // First page
             <>

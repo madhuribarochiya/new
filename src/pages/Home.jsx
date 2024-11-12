@@ -35,7 +35,7 @@ const ToolCard = ({ tool }) => {
 
   return (
     <div className="relative bg-white dark:text-gray-200 dark:bg-secondary-dark-bg rounded-2xl p-4 w-full">
-      <img src={`http://localhost:4000/load/${tool.image[0]}`} onClick={() => navigate(`/tool/${tool._id}`)} alt={tool.name} className="w-full h-48 object-cover rounded-md" />
+      <img src={`http://localhost:4000/load/${tool.image.length !== 0 ? tool.image[0] : 'default tool icon.jpeg'}`} onClick={() => navigate(`/tool/${tool._id}`)} alt={tool.name} className="w-full h-48 object-cover rounded-md" />
       <h2 className="underline-on-hover text-lg font-semibold mt-2" onClick={() => navigate(`/tool/${tool._id}`)}>{tool.name}</h2>
       <p className={`text-sm text-${currentMode === "Dark" ? 'gray-400' : 'black'} overflow-hidden text-ellipsis whitespace-nowrap`}>{tool.description}</p>
 
