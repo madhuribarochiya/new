@@ -14,12 +14,18 @@ const AITool = () => {
     const [tool, setTool] = useState(null);
     const { currentMode } = useStateContext();
     const [newComment, setNewComment] = useState('');
+    const [liked, setLiked] = useState(null);
+    const [disliked, setDisliked] = useState(null);
 
     const fetchTool = async () => {
         const toolId = window.location.pathname.split('/').pop();
         const response = await axios.get(`http://localhost:4000/tools/getDetails/${toolId}`, { withCredentials: true });
         if (response.data.success) {
-            setTool(response.data.data);
+            setTool(response.data.data.tool);
+            if (response.data.data.liked)
+                setLiked(true)
+            else
+                setDisliked(true);
         }
     };
 
@@ -37,6 +43,8 @@ const AITool = () => {
             const toolId = window.location.pathname.split('/').pop();
             const res = await axios.post(`http://localhost:4000/tools/addLike/${toolId}`, {}, { withCredentials: true });
             console.log(res)
+            setLiked(true)
+            setDisliked(false)
             fetchTool();
         } catch (error) {
             console.error("Error liking tool:", error);
@@ -47,7 +55,9 @@ const AITool = () => {
         try {
             const toolId = window.location.pathname.split('/').pop();
             const res = await axios.post(`http://localhost:4000/tools/addDislike/${toolId}`, {}, { withCredentials: true });
-            console.log(res)
+            console.log("res", res)
+            setLiked(false)
+            setDisliked(true)
             fetchTool();
         } catch (error) {
             console.error("Error disliking tool:", error);
@@ -61,7 +71,7 @@ const AITool = () => {
             const res = await axios.post(`http://localhost:4000/tools/addComment/${toolId}`, { text: newComment }, { withCredentials: true });
             if (res.data.success) {
                 toast.update(toastId, { render: "Comment added", type: "success", isLoading: false, autoClose: 3000 });
-            }else{
+            } else {
                 toast.update(toastId, { render: "Error adding Comment", type: "error", isLoading: false, autoClose: 3000 });
             }
             setNewComment('');
@@ -89,21 +99,31 @@ const AITool = () => {
                 </button>
 
                 {/* Centered Image */}
-                <img
-                    src={`http://localhost:4000/load/${tool?.image[0]}`} // Updated to handle image array
-                    alt={tool?.name}
-                    className="w-3/4 h-64 object-cover rounded-lg mb-8 shadow-lg"
-                />
+                {tool ? (
+                    <img
+                        src={`http://localhost:4000/load/${tool?.image.length === 0 ? "default tool icon.jpeg" : tool.image[0]}`}
+                        alt={tool?.name}
+                        className="w-3/4 h-64 object-cover rounded-lg mb-8 shadow-lg"
+                    />
+                ) : (
+                    <div className="w-full h-64 flex justify-center items-center bg-gray-200">
+                        <p>Loading Tool...</p>
+                    </div>
+                )}
 
                 <h1 className={`text-3xl text-${currentMode === "Dark" ? 'white' : 'black'} font-bold mb-4`}>{tool?.name}</h1>
                 <p className={`text-lg text-${currentMode === "Dark" ? 'white' : 'black'} mb-6 text-start`}>{tool?.description}</p>
 
                 <div className="flex space-x-6 mb-8">
-                    <button className="flex items-center text-blue-500">
+                    <button
+                        className={`flex items-center ${liked ? 'text-blue-500' : 'text-blue-100'} hover:text-blue-700`}
+                        onClick={handleLike}>
                         <FaThumbsUp className="mr-2" onClick={handleLike} /> {tool?.likes}
                     </button>
-                    <button className="flex items-center text-red-500">
-                        <FaThumbsDown className="mr-2" onClick={handleDislike} /> {tool?.dislikes}
+                    <button
+                        className={`flex items-center ${disliked ? "text-red-500" : "text-red-100"} hover:text-red-700`}
+                        onClick={handleDislike}>
+                        <FaThumbsDown className="mr-2" /> {tool?.dislikes}
                     </button>
                     <button
                         className="flex items-center text-purple-500"
