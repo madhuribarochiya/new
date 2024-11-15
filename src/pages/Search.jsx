@@ -73,14 +73,15 @@ const ToolCard = ({ tool }) => {
 };
 
 const Search = () => {
-    const [tools, setTools] = useState([]);
-    const containerRef = useRef(null);
-    // const navigate = useNavigate();
+    const [tools, setTools] = useState([]); // State for tools
+    const [page, setPage] = useState(1);    // State for current page
+    const containerRef = useRef(null);      // Reference to the scrollable container
 
     const fetchTools = async () => {
         try {
             const search = window.location.pathname.split('/').pop();
-            const response = await axios.get(`http://localhost:4000/tools/search/${search}`, { withCredentials: true });
+            const response = await axios.get(`http://localhost:4000/tools/search/${search}?page=${page}`, { withCredentials: true });
+
             if (response.data.success) {
                 setTools(prevTools => [...prevTools, ...response.data.data]); // Append new tools
             } else {
@@ -94,15 +95,16 @@ const Search = () => {
     // Load initial tools
     useEffect(() => {
         fetchTools(); // Fetch tools on component mount
-    }, []);
+    }, [page]); // Fetch again when the page number changes
 
     // Infinite scroll logic
     useEffect(() => {
         const handleScroll = () => {
             if (containerRef.current) {
                 const { scrollTop, scrollHeight, clientHeight } = containerRef.current;
+                // Trigger next page load when user scrolls to the bottom
                 if (scrollTop + clientHeight >= scrollHeight - 5) {
-                    fetchTools(); // Fetch more tools when at the bottom
+                    setPage(prevPage => prevPage + 1); // Increment the page number to load next set of tools
                 }
             }
         };
@@ -113,7 +115,7 @@ const Search = () => {
         return () => {
             currentContainer.removeEventListener('scroll', handleScroll);
         };
-    }, [containerRef]);
+    }, []); // Only set up the event listener once
 
     return (
         <>

@@ -18,7 +18,7 @@ export const ContextProvider = ({ children }) => {
   const [themeSettings, setThemeSettings] = useState(false);
   const [activeMenu, setActiveMenu] = useState(true);
   const [isClicked, setIsClicked] = useState(initialState);
-  const [isLoggedIn, setIsLoggedIn] = useState(false); // New login state
+  const [isLoggedIn, setIsLoggedIn] = useState(null); // New login state
   const [user, setUser] = useState();
 
   const fetchUser = async () => {

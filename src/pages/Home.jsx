@@ -10,7 +10,6 @@ const ToolCard = ({ tool }) => {
   const [menuOpen, setMenuOpen] = useState(false);
   const { currentMode } = useStateContext();
   const navigate = useNavigate();
-
   const toggleMenu = () => {
     setMenuOpen(!menuOpen);
   };
@@ -75,25 +74,40 @@ const ToolCard = ({ tool }) => {
 const Home = () => {
   const [tools, setTools] = useState([]);
   const containerRef = useRef(null);
-  // const navigate = useNavigate();
+  const [page, setPage] = useState(1);    // State for current page
+
+  const { user, isLoggedIn } = useStateContext();
 
   const fetchTools = async () => {
     try {
-      const response = await axios.get('http://localhost:4000/tools/tools', { withCredentials: true });
-      if (response.data.success) {
-        setTools(prevTools => [...prevTools, ...response.data.data]); // Append new tools
+      if (isLoggedIn === null) {
+        console.log("dont do anything")
+      }
+      else if (isLoggedIn === true) {
+        const response = await axios.get(`http://127.0.0.1:8000/recommendations?user_id=${user._id}&page=${page}`);
+        if (response.data.success) {
+          setTools(prevTools => [...prevTools, ...response.data.data]); // Append new tools
+        } else {
+          console.log("Failed to fetch tools."); // Error toast
+        }
       } else {
-        console.error("Failed to fetch tools."); // Error toast
+        console.log(false)
+        const response = await axios.get(`http://localhost:4000/tools/tools`, { withCredentials: true });
+        if (response.data.success) {
+          setTools(prevTools => [...prevTools, ...response.data.data]); // Append new tools
+        } else {
+          console.log("Failed to fetch tools."); // Error toast
+        }
       }
     } catch (error) {
-      console.error('Error fetching tools:', error);
+      console.log('Error fetching tools:', error);
     }
   };
 
   // Load initial tools
   useEffect(() => {
     fetchTools(); // Fetch tools on component mount
-  }, []);
+  }, [page, isLoggedIn]);
 
   // Infinite scroll logic
   useEffect(() => {
@@ -101,7 +115,7 @@ const Home = () => {
       if (containerRef.current) {
         const { scrollTop, scrollHeight, clientHeight } = containerRef.current;
         if (scrollTop + clientHeight >= scrollHeight - 5) {
-          fetchTools(); // Fetch more tools when at the bottom
+          setPage(prevPage => prevPage + 1); // Fetch more tools when at the bottom
         }
       }
     };
@@ -112,7 +126,7 @@ const Home = () => {
     return () => {
       currentContainer.removeEventListener('scroll', handleScroll);
     };
-  }, [containerRef]);
+  }, []);
 
   return (
     <>
