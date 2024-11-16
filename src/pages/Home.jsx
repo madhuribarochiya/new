@@ -79,12 +79,14 @@ const ToolCard = ({ tool }) => {
 
 const Home = () => {
   const [tools, setTools] = useState([]);
+  const [loading, setLoading] = useState(true); // State for loading
   const containerRef = useRef(null);
   const [page, setPage] = useState(1);    // State for current page
 
   const { user, isLoggedIn } = useStateContext();
 
   const fetchTools = async () => {
+    setLoading(true); // Set loading to true when fetching starts
     try {
       if (isLoggedIn === null) {
         console.log("dont do anything")
@@ -107,6 +109,8 @@ const Home = () => {
       }
     } catch (error) {
       console.log('Error fetching tools:', error);
+    } finally {
+      setLoading(false); // Set loading to false when fetching ends
     }
   };
 
@@ -125,28 +129,43 @@ const Home = () => {
         }
       }
     };
-
+  
     const currentContainer = containerRef.current;
-    currentContainer.addEventListener('scroll', handleScroll);
-
+  
+    // Check if the element exists before adding the event listener
+    if (currentContainer) {
+      currentContainer.addEventListener('scroll', handleScroll);
+    }
+  
     return () => {
-      currentContainer.removeEventListener('scroll', handleScroll);
+      // Check if the element exists before removing the event listener
+      if (currentContainer) {
+        currentContainer.removeEventListener('scroll', handleScroll);
+      }
     };
-  }, []);
+  }, [containerRef]);
+  
 
   return (
     <>
       <ToastContainer />
-      <div className="" ref={containerRef} style={{ overflowY: 'auto', maxHeight: '80vh' }}>
-        {/* Adjusted Grid Layout for Tool Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 p-4">
-          {tools.map((tool, index) => (
-            <div key={index} >
-              <ToolCard tool={tool} />
-            </div>
-          ))}
+      {loading ? ( // Show loading screen while loading
+        <div className="flex justify-center items-center h-full">
+          <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-blue-500"></div>
+          <p className="ml-4">Loading tools...</p>
         </div>
-      </div>
+      ) : (
+        <div className="" ref={containerRef} style={{ overflowY: 'auto', maxHeight: '80vh' }}>
+          {/* Adjusted Grid Layout for Tool Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 p-4">
+            {tools.map((tool, index) => (
+              <div key={index} >
+                <ToolCard tool={tool} />
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </>
   );
 };
