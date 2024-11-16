@@ -127,7 +127,7 @@ const History = () => {
             tool && (
               <ToolCard
                 key={index}
-                title={tool.toolId.title}
+                title={tool.toolId.name}
                 description={tool.toolId.description}
                 image={tool.toolId.image}
                 tool={tool.toolId}

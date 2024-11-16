@@ -16,6 +16,7 @@ const UploadTool = () => {
   const [files, setFiles] = useState([]);
   const [toolsID, setToolsID] = useState()
   const [currentPage, setCurrentPage] = useState(1); // Track the current page
+  const [category, setCategory] = useState(null)
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -101,6 +102,17 @@ const UploadTool = () => {
                   value={price}
                   onChange={(e) => setPrice(e.target.value)}
                   placeholder="Enter tool price"
+                />
+              </div>
+              <div className="mb-4">
+                <label htmlFor="category" className="block text-gray-700 dark:text-gray-200 font-semibold mb-2">Category</label>
+                <input
+                  type="text"
+                  id="category"
+                  className="w-full p-2 border rounded-md dark:bg-gray-800 dark:text-white"
+                  value={category}
+                  onChange={(e) => setCategory(e.target.value)}
+                  placeholder="Enter tool category"
                 />
               </div>
             </>
